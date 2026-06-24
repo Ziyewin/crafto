@@ -1,0 +1,57 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── 环境变量（含 API Key，绝对不能提交） ──
+.env
+
+# ── 数据库 ──
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── macOS ──
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# ── 日志 ──
+logs/
+*.log
+
+# ── 临时文件 ──
+tmp/
+temp/
+/tmp/
+
+# ── 前端构建 ──
+node_modules/
+dist/
+.build/
+
+# ── MCP 缓存 ──
+mcp-servers/*/__pycache__/
+sandbox_mcp/__pycache__/
+
+# ── OS 生成的其他垃圾 ──
+*.bak
+*.orig
+*.tmp

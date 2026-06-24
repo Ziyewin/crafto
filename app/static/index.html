@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工业级智能 Agent 平台</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- ── 动态背景粒子 ── -->
+<div class="bg-particles"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ── Toast 消息容器 ── -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 登录/注册页 -->
+<!-- ═══════════════════════════════════════ -->
+<div id="auth-page" class="auth-page">
+  <div class="auth-card">
+    <h1>🤖 Agent 平台</h1>
+    <p class="subtitle">工业级智能 Agent 平台 · 多租户 · 双工具体系 · 三级记忆</p>
+
+    <!-- Tab 切换 -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">登录</button>
+      <button class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</button>
+    </div>
+
+    <div id="auth-error" class="error-msg"></div>
+
+    <!-- 登录表单 -->
+    <div id="login-form">
+      <div class="form-group">
+        <label>用户名</label>
+        <input id="login-username" type="text" placeholder="输入用户名" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input id="login-password" type="password" placeholder="输入密码" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" onclick="handleLogin()">登 录</button>
+      <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-muted);">
+        没有账号？<a href="#" onclick="switchAuthTab('register');return false">立即注册</a>
+      </p>
+    </div>
+
+    <!-- 注册表单 -->
+    <div id="register-form" style="display:none;">
+      <div class="form-group">
+        <label>用户名</label>
+        <input id="reg-username" type="text" placeholder="设置用户名" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input id="reg-password" type="password" placeholder="至少6位密码" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>用户角色</label>
+        <select id="reg-role">
+          <option value="normal">普通用户（仅预置工具）</option>
+          <option value="advanced" selected>高级用户（开放代码沙箱）</option>
+          <option value="admin">管理员</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="handleRegister()">注 册</button>
+      <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-muted);">
+        已有账号？<a href="#" onclick="switchAuthTab('login');return false">去登录</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 主应用 -->
+<!-- ═══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── 侧边栏 ── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>🤖 Agent</h2>
+      <span class="badge">v1.0</span>
+    </div>
+
+    <button class="new-chat-btn" onclick="newSession()">
+      <span>＋</span> 新对话
+    </button>
+
+    <div class="session-list" id="session-list">
+      <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px;">加载中...</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-detail">
+          <div class="name" id="user-name">用户</div>
+          <div class="role" id="user-role">普通用户</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-ghost btn-sm" id="admin-link" onclick="openAdmin()" title="管理后台" style="display:none;">⚙️</button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()" title="退出登录">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── 主内容 ── -->
+  <main class="main-content">
+    <div class="chat-header">
+      <h3 id="chat-title">智能 Agent 平台</h3>
+      <div class="meta">
+        <span id="model-badge">🧠 DeepSeek</span>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="empty-state">
+        <div class="icon">🤖</div>
+        <h3>欢迎使用智能 Agent 平台</h3>
+        <p>
+          这是一个多租户工业级智能 Agent 平台，支持预置工具调用和代码生成执行。
+          <br><br>
+          登录后即可开始对话。
+        </p>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-wrapper">
+        <textarea id="chat-input"
+                  placeholder="输入你的问题，按 Enter 发送，Shift+Enter 换行..."
+                  rows="1"
+                  oninput="autoResize(this)"
+                  ></textarea>
+        <button class="send-btn" onclick="sendMessage()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M1.5 1.5L14.5 8L1.5 14.5L4 8L1.5 1.5Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;padding:0 4px;">
+        <span style="font-size:11px;color:var(--text-muted);">Enter 发送 · Shift+Enter 换行</span>
+        <span id="status-indicator" style="font-size:11px;color:var(--text-muted);">就绪</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- 管理后台模态框 -->
+<!-- ═══════════════════════════════════════ -->
+<div id="admin-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>⚙️ 管理后台</h3>
+      <button class="modal-close" onclick="closeAdmin()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="anomalies" onclick="switchAdminTab('anomalies')">🔴 异常记录</button>
+        <button class="admin-tab" data-tab="logs" onclick="switchAdminTab('logs')">📋 日志查询</button>
+        <button class="admin-tab" data-tab="users" onclick="switchAdminTab('users')">👥 用户管理</button>
+      </div>
+
+      <div id="admin-anomalies" class="admin-panel">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>异常ID</th>
+              <th>类型</th>
+              <th>用户</th>
+              <th>重试状态</th>
+              <th>已解决</th>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody id="anomalies-table">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="admin-logs" class="admin-panel" style="display:none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>TraceID</th>
+              <th>级别</th>
+              <th>组件</th>
+              <th>消息</th>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody id="logs-table">
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="admin-users" class="admin-panel" style="display:none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>用户ID</th>
+              <th>用户名</th>
+              <th>角色</th>
+              <th>状态</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody id="users-table">
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 脚本 ── -->
+<script src="/static/js/app.js"></script>
+</body>
+</html>
