@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     sandbox_mode: str = "mock"                     # mock | docker | e2b
     sandbox_timeout: int = 30                      # 沙箱执行超时（秒）
 
+    # ── 第三方 MCP 服务密钥 ──
+    luckin_mcp_key: str = ""                       # 瑞幸咖啡 MCP Bearer Token
+
     # ── 应用基础 ──
     secret_key: str = "dev-secret-key"             # JWT/加密密钥
     log_level: str = "DEBUG"                       # 日志级别

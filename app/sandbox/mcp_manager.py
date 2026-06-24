@@ -21,6 +21,8 @@ from mcp.client.sse import sse_client
 from mcp.client.streamable_http import streamable_http_client
 import httpx
 
+from app.config import settings
+
 logger = logging.getLogger("sandbox.mcp_manager")
 
 # ═══════════════════════════════════════════════════════════
@@ -61,9 +63,7 @@ MCP_SERVICE_DEFS: list[dict] = [
         "name": "luckin",
         "type": "streamable",
         "url": "https://gwmcp.lkcoffee.com/order/user/mcp",
-        "headers": {
-            "Authorization": "Bearer xxx",
-        },
+        "headers": {},
         "description": "瑞幸咖啡 MCP 服务",
     },
 
@@ -77,6 +77,18 @@ MCP_SERVICE_DEFS: list[dict] = [
 # ═══════════════════════════════════════════════════════════
 # 单个 MCP 服务连接
 # ═══════════════════════════════════════════════════════════
+
+def _build_mcp_service_defs() -> list[dict]:
+    """构建 MCP 服务配置列表，从 Settings 注入密钥"""
+    defs = []
+    for svc in MCP_SERVICE_DEFS:
+        svc = dict(svc)  # shallow copy
+        if svc.get("name") == "luckin" and settings.luckin_mcp_key:
+            svc["headers"] = {
+                "Authorization": f"Bearer {settings.luckin_mcp_key}",
+            }
+        defs.append(svc)
+    return defs
 
 class MCPServiceConnection:
     """一个 MCP 服务的连接（支持 stdio 或 sse）"""
@@ -220,7 +232,7 @@ class MCPManager:
     async def start_all(self):
         """启动并连接所有配置的 MCP 服务（每个连接超时 10 秒）"""
         import asyncio
-        for svc in MCP_SERVICE_DEFS:
+        for svc in _build_mcp_service_defs():
             conn = MCPServiceConnection(svc)
             try:
                 ok = await asyncio.wait_for(conn.start(), timeout=20.0)
