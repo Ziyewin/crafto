@@ -62,7 +62,7 @@ MCP_SERVICE_DEFS: list[dict] = [
         "type": "streamable",
         "url": "https://gwmcp.lkcoffee.com/order/user/mcp",
         "headers": {
-            "Authorization": "Bearer 1db04949f5834c8b9a0a5b733cd232944mcpLUCKIN_MCP_AI",
+            "Authorization": "Bearer xxx",
         },
         "description": "瑞幸咖啡 MCP 服务",
     },
